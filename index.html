@@ -46,6 +46,7 @@ body{background:radial-gradient(120% 80% at 50% 0,var(--b2),var(--b1) 70%),var(-
 .card{position:relative;width:min(92vw,420px);max-height:84vh;overflow:auto;background:var(--card);color:var(--ink);border-radius:22px;padding:26px 22px 20px;box-shadow:0 30px 80px #000a,0 0 0 1px #8cc0ff55;display:none;text-align:center;box-sizing:border-box}
 .card.show{display:block;animation:pop .9s cubic-bezier(.2,1.2,.4,1)}
 @keyframes pop{from{opacity:0;transform:translateY(90px) scale(.6) rotate(-3deg)}}
+.card.bye{animation:bye .45s forwards}@keyframes bye{to{opacity:0;transform:translateY(90px) scale(.6) rotate(-3deg)}}
 .brand{font:800 1.5rem "Playfair Display",serif;letter-spacing:.25em;color:var(--h2)}
 .brand small{display:block;font:600 .62rem Poppins,sans-serif;letter-spacing:.4em;color:var(--muted)}
 h2{font:800 1.55rem/1.2 "Playfair Display",serif;margin:14px 0 8px;background:linear-gradient(90deg,var(--h1),var(--h2),var(--h1));background-size:300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 5s linear infinite}
@@ -70,6 +71,8 @@ input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;bord
 .dots{margin-top:16px}.dots span{display:inline-block;width:8px;height:8px;margin:0 3px;border-radius:6px;background:var(--muted);opacity:.35;transition:.3s}.dots .on{opacity:1;background:var(--b3);width:22px}
 .cf{top:-14px;width:8px;height:14px;z-index:20;animation:cf 3s ease-in forwards}
 @keyframes cf{to{transform:translate3d(var(--x),105vh,0) rotate(720deg)}}
+.ls{margin-top:14px;font-size:.85rem;color:var(--muted)}.ch{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;max-height:110px;overflow:auto}.ch span{background:linear-gradient(120deg,var(--b2),var(--b3));color:#fff;border-radius:999px;padding:4px 10px;animation:pp .4s both}@keyframes pp{from{opacity:0;transform:scale(.5)}}
+.mu{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:30;width:44px;height:44px;border-radius:50%;border:0;background:#ffffff26;color:#fff;font-size:1.3rem;backdrop-filter:blur(6px);cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01s!important}.fl,.bk,.cf{display:none}}
 </style></head><body>
 <main class="scene">
@@ -80,11 +83,14 @@ input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;bord
 <div class="pane"><h2>Estás invitado(a)</h2><p class="tx"></p>
 <div class="tl" id="tl"><div class="t"><span>📅</span><div><small>Fecha</small><b id="f1"></b></div></div><div class="t"><span>🕗</span><div><small>Hora</small><b id="f2"></b></div></div><div class="t"><span>📍</span><div><small>Lugar</small><b id="f3"></b></div></div></div></div>
 <div class="pane"><h2>Confirma tu asistencia</h2><p class="tx"></p>
-<div class="fm" id="fm"><input id="nm" placeholder="Tu nombre completo" autocomplete="name"><div class="row"><button class="btn" onclick="rsvp(true)">¡Ahí estaré!</button><button class="btn ghost" onclick="rsvp(false)">No podré ir</button></div><p class="ms" id="ms"></p><a class="btn" id="wa" target="_blank" rel="noopener" hidden>Avisar por WhatsApp ➜</a></div></div>
+<div class="fm" id="fm"><input id="nm" placeholder="Tu nombre completo" autocomplete="name"><div class="row"><button class="btn" onclick="rsvp(true)">¡Ahí estaré!</button><button class="btn ghost" onclick="rsvp(false)">No podré ir</button></div><p class="ms" id="ms"></p><div class="ls" id="ls" hidden></div></div></div>
 <div class="dots"><span></span><span></span><span></span></div><small class="sw">↔ Desliza para avanzar o volver</small>
 <div class="row nx"><button class="btn ghost" id="bk" hidden>⬅ Atrás</button><button class="btn" id="nx">Continuar ➜</button></div>
 </section></main>
+<button class="mu" id="mu" aria-label="Música">🔇</button>
 <script>
+// EDITA AQUÍ: enlace de la lista de confirmados (Google Apps Script, termina en /exec)
+const API="https://script.google.com/macros/s/AKfycbxwre5oeuxPna6t57O1VATwoP9X4npofs2xKsjfzmwQFbpOU5sD1MCsBL4E9MG9gkfH/exec";
 // EDITA AQUÍ: fecha, hora y lugar de la fiesta
 const F={fecha:"Viernes 11 de diciembre de 2026",hora:"8:00 p. m.",lugar:"Lugar por confirmar"};
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),RM=matchMedia("(prefers-reduced-motion: reduce)").matches,r=(a,b)=>a+Math.random()*(b-a);
@@ -112,12 +118,20 @@ const S=[
 {t:"¿Nos acompañas? Confirma tu asistencia para que no falte nada para ti.",x(){$("#fm").classList.add("in")}}];
 let k=-1,mx=-1;
 function go(){if(ty){ty();return}if(k<S.length-1)show(k+1)}
-function back(){if(ty)ty();if(k>0)show(k-1)}
+function back(){if(ty)ty();if(k>0)show(k-1);else if(k===0)closeEnv()}
+function closeEnv(){
+const e=$("#env"),c=$("#card");
+k=-1;mx=-1;$$(".tl,.fm").forEach(x=>x.classList.remove("in"));
+c.classList.add("bye");
+setTimeout(()=>{c.classList.remove("show","bye");e.classList.remove("away")},450);
+setTimeout(()=>e.classList.remove("out"),900);
+setTimeout(()=>e.classList.remove("open"),1700)}
 function show(i){k=i;
 $$(".pane").forEach((p,j)=>p.classList.toggle("on",j===i));
 $$(".dots span").forEach((d,j)=>d.classList.toggle("on",j===i));
-$("#nx").hidden=i===S.length-1;$("#bk").hidden=i<1;
+$("#nx").hidden=i===S.length-1;$("#bk").hidden=false;
 const el=$$(".tx")[i];
+if(i===2&&API)load("").then(draw).catch(()=>{$("#ls").textContent="No pudimos cargar la lista."});
 if(i<=mx){el.textContent=S[i].t;S[i].x();return}
 mx=i;if(i)boom(30);
 typeTo(el,S[i].t,S[i].x)}
@@ -128,17 +142,31 @@ cd.onclick=e=>{if(Date.now()-sw<400||e.target.closest(".fm,#bk"))return;go()};
 $("#bk").onclick=back;
 $("#env").onclick=function(){
 if(this.classList.contains("open"))return;
-this.classList.add("open");boom(60);
+this.classList.add("open");boom(60);if(!mus){mus=1;tog()}
 setTimeout(()=>this.classList.add("out"),800);
 setTimeout(()=>{this.classList.add("away");$("#card").classList.add("show")},1700);
-setTimeout(go,2500)};
-// EDITA AQUÍ: tu WhatsApp con lada, ejemplo: 521234567890 (52 + tu número a 10 dígitos)
-const WA="";
-function rsvp(si){
+setTimeout(()=>{if(k<0&&this.classList.contains("open"))go()},2500)};
+const load=q=>fetch(API+q,{cache:"no-store"}).then(r=>r.json());
+function draw(d){
+const L=$("#ls"),y=d.filter(x=>x.a),h=document.createElement("b"),w=document.createElement("div");
+h.textContent=y.length?`Ya confirmaron (${y.length})`:"Sé el primero en confirmar 🎉";w.className="ch";
+y.forEach((x,i)=>{const e=document.createElement("span");e.textContent=x.n;e.style.animationDelay=i*.05+"s";w.append(e)});
+L.replaceChildren(h,w)}
+if(API){$("#ls").hidden=false;$("#ls").textContent="Cargando lista…"}
+async function rsvp(si){
 const nm=$("#nm").value.trim(),m=$("#ms");
 if(!nm){m.textContent="Escribe tu nombre para registrarte.";$("#nm").focus();return}
-const t=si?`Hola, confirmo mi asistencia a la fiesta de fin de año de Braun Instalaciones. Soy ${nm}.`:`Hola, no podré asistir a la fiesta de fin de año de Braun Instalaciones. Soy ${nm}.`;
-m.textContent=si?`¡Gracias, ${nm}! Último paso: toca el botón para avisarnos 🎉`:`Gracias por avisar, ${nm}. Toca el botón para avisarnos.`;
-const a=$("#wa");a.href=`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;a.hidden=false;
-if(si)boom(90)}
+const ok=si?`¡Qué gusto, ${nm}! Te esperamos en la fiesta 🎉`:`Gracias por avisar, ${nm}. ¡Te vamos a extrañar!`;
+if(!API){m.textContent=ok;if(si)boom(90);return}
+m.textContent="Enviando…";
+try{draw(await load(`?nombre=${encodeURIComponent(nm)}&asiste=${si?1:0}`));m.textContent=ok;if(si)boom(90)}
+catch(e){m.textContent="No pudimos registrar tu respuesta. Intenta de nuevo."}}
+// Música navideña sencilla (Jingle Bells), generada en el navegador
+const FR={C:261.63,D:293.66,E:329.63,F:349.23,G:392,R:0},A_="E1 E1 E2 E1 E1 E2 E1 G1 C1.5 D.5 E4 ",B_="F1 F1 F1.5 F.5 F1 E1 E.5 E.5 E1 E1 D1 D1 E1 D2 G2 ",C_="F1 F1 F1.5 F.5 F1 E1 E.5 E.5 E1 G1 G1 F1 D1 C4 ";
+const N=(A_+B_+A_+C_+"R2").split(" ").map(x=>[FR[x[0]],+x.slice(1)]);
+let ac,on=false,ni=0,mus=0,tm;
+function tone(f,d){for(const h of [1,2]){const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type=h>1?"sine":"triangle";o.frequency.value=f*h;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(h>1?.04:.12,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d*.9+.4);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d*.9+.5)}}
+function step(){if(!on)return;const[f,b]=N[ni++%N.length];if(f)tone(f,b*.45);tm=setTimeout(step,b*450)}
+function tog(){ac=ac||new(window.AudioContext||window.webkitAudioContext)();clearTimeout(tm);on=!on;if(on){ac.resume();step()}$("#mu").textContent=on?"🔊":"🔇"}
+$("#mu").onclick=tog;
 </script></body></html>
